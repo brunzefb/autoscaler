@@ -399,3 +399,17 @@ To refresh static list, please run `go run ec2_instance_types/gen.go` under
   EC2 launch configuration has the setting `Metadata response hop limit` set to `2`.
   Otherwise, the `/latest/api/token` call will timeout and result in an error. See [AWS docs here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html#configuring-instance-metadata-options) for further information.
 - If you don't use EKS managed nodegroups, don't add the `eks:nodegroup-name` tag to the ASG as this will lead to extra EKS API calls that could slow down scaling when there are 0 nodes in the nodegroup.
+* If you are using helm, you should setup the autoDiscovery correctly in the values.yaml.
+  Beyond tagging the autoscaling groups, it is important to set the `clusterName` and
+  `tag` values correctly.
+  ```
+  autoDiscovery: 
+  # Only cloudProvider `aws` and `gce` are supported by auto-discovery at this time
+    clusterName: YOUR_CLUSTER_NAME
+    tags:
+      k8s.io/cluster-autoscaler/enabled
+      k8s.io/cluster-autoscaler/<YOUR_CLUSTER_NAME>
+      # note that the < brackets > are required in the above line
+    ```
+* When the above is done, make sure that you don't also set the `node-group-auto-discovery`
+  in the `extraArgs`.
